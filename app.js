@@ -43,7 +43,7 @@ app.use(
 // Cors Policy
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://devister.vercel.app/",
   })
 );
 
