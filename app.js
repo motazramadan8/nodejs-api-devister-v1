@@ -41,11 +41,7 @@ app.use(
 );
 
 // Cors Policy
-app.use(
-  cors({
-    origin: "https://devister.vercel.app/",
-  })
-);
+app.use(cors());
 
 // Routes
 app.use("/api/auth", require("./routes/authRoute"));
