@@ -42,11 +42,11 @@ app.use(
 
 
 // Cors Policy
-app.use(
-  cors({
-    origin: "https://devister.vercel.app",
-  })
-);
+// app.use(
+//   cors({
+//     origin: "https://devister.vercel.app",
+//   })
+// );
 
 
 // Routes
