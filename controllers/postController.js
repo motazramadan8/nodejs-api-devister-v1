@@ -35,7 +35,7 @@ module.exports.createPostCrtl = asyncHandler(async (req, res) => {
   // Upload Photo
   const imagePath = path.join(__dirname, `../images/${req.file.filename}`);
   const result = await cloudinaryUploadImage(imagePath);
-
+  
   // Create New Post And Save It In DB
   const post = await Post.create({
     title: req.body.title,
@@ -284,12 +284,6 @@ module.exports.toggleLikeCtrl = asyncHandler(async (req, res) => {
       },
       { new: true }
     );
-  }
-
-  // Send Response To Client
-  res.status(200).json(post);
-});
-
   }
 
   // Send Response To Client
