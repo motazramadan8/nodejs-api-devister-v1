@@ -22,10 +22,13 @@ const PostSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    category: {
-      type: String,
-      required: true,
-    },
+    category: [
+      {
+        type: String,
+        required: true,
+        ref: "Category",
+      },
+    ],
     image: {
       type: Object,
       default: {
@@ -72,7 +75,7 @@ function validationUpdatePost(obj) {
   const schema = Joi.object({
     title: Joi.string().trim().min(2).max(200),
     description: Joi.string().trim().min(10),
-    category: Joi.string().trim(),
+    category: Joi.array(),
   });
   return schema.validate(obj);
 }
