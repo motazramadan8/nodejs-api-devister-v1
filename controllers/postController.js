@@ -6,7 +6,7 @@ const {
   validationCreatePost,
   validationUpdatePost,
 } = require("../models/Post");
-const { User } = "../models/User"
+const { User } = "../models/User";
 const {
   cloudinaryUploadImage,
   cloudinaryRemoveImage,
@@ -40,7 +40,7 @@ module.exports.createPostCrtl = asyncHandler(async (req, res) => {
   const post = await Post.create({
     title: req.body.title,
     description: req.body.description,
-    category: req.body.category,
+    category: req.body.category.split(","),
     user: req.user.id,
     image: {
       url: result.secure_url,
@@ -53,6 +53,48 @@ module.exports.createPostCrtl = asyncHandler(async (req, res) => {
 
   // Delete Image From Server
   await fs.unlinkSync(imagePath);
+});
+
+/** -----------------------------------
+ * @desc   Update Post
+ * @route  /api/posts/:id
+ * @method PUT
+ * @access private (Only Owner Of Post)
+-----------------------------------*/
+
+module.exports.updatePostCtrl = asyncHandler(async (req, res) => {
+  // Validatoin
+  const { error } = validationUpdatePost(req.body);
+  if (error) {
+    return res.status(400).json({ msg: error.details[0].message });
+  }
+
+  // Get Post From DB If It Exist
+  const post = await Post.findById(req.params.id);
+  if (!post) {
+    return res.status(404).json({ msg: "Post Not Found" });
+  }
+
+  // Check If User That Want To Update Post Is Owner Of Post And If User Logged In
+  if (req.user.id !== post.user.toString()) {
+    return res.status(403).json({ msg: "Not Allow, Only Owner User" });
+  }
+
+  // Update Post Data In DB
+  const updatedPost = await Post.findByIdAndUpdate(
+    req.params.id,
+    {
+      $set: {
+        title: req.body.title,
+        description: req.body.description,
+        category: req.body.category,
+      },
+    },
+    { new: true }
+  ).populate("user", ["-password"]);
+
+  // Send Response To Client
+  res.status(200).json({ msg: "Post Updated Successfully", post: updatedPost });
 });
 
 /** -----------------------------------
@@ -96,8 +138,7 @@ module.exports.getAllPostsCtrl = asyncHandler(async (req, res) => {
 module.exports.getSinglePostsCtrl = asyncHandler(async (req, res) => {
   const post = await Post.findById(req.params.id)
     .populate("user", ["-password"])
-    .populate("comments")
-  
+    .populate("comments");
   if (!post) {
     return res.status(404).json({ msg: "Post Not Found" });
   }
@@ -152,48 +193,6 @@ module.exports.deletePostCtrl = asyncHandler(async (req, res) => {
       .status(403)
       .json({ msg: "Not Allow, Only Owner User Or Admins" });
   }
-});
-
-/** -----------------------------------
- * @desc   Update Post
- * @route  /api/posts/:id
- * @method PUT
- * @access private (Only Owner Of Post)
------------------------------------*/
-
-module.exports.updatePostCtrl = asyncHandler(async (req, res) => {
-  // Validatoin
-  const { error } = validationUpdatePost(req.body);
-  if (error) {
-    return res.status(400).json({ msg: error.details[0].message });
-  }
-
-  // Get Post From DB If It Exist
-  const post = await Post.findById(req.params.id);
-  if (!post) {
-    return res.status(404).json({ msg: "Post Not Found" });
-  }
-
-  // Check If User That Want To Update Post Is Owner Of Post And If User Logged In
-  if (req.user.id !== post.user.toString()) {
-    return res.status(403).json({ msg: "Not Allow, Only Owner User" });
-  }
-
-  // Update Post Data In DB
-  const updatedPost = await Post.findByIdAndUpdate(
-    req.params.id,
-    {
-      $set: {
-        title: req.body.title,
-        description: req.body.description,
-        category: req.body.category,
-      },
-    },
-    { new: true }
-  ).populate("user", ["-password"]);
-
-  // Send Response To Client
-  res.status(200).json({ msg: "Post Updated Successfully", post: updatedPost });
 });
 
 /** -----------------------------------
@@ -285,6 +284,12 @@ module.exports.toggleLikeCtrl = asyncHandler(async (req, res) => {
       },
       { new: true }
     );
+  }
+
+  // Send Response To Client
+  res.status(200).json(post);
+});
+
   }
 
   // Send Response To Client
