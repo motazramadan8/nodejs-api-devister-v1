@@ -9,6 +9,7 @@ const {
   getAllCommentsCtrl,
   deleteCommentCtrl,
   updateCommentCtrl,
+  toggleLikeCommentCtrl,
 } = require("../controllers/commentController");
 
 // /api/comments
@@ -21,5 +22,8 @@ router
 router.route("/:id")
   .delete(validateObjecId, verifyToken, deleteCommentCtrl)
   .put(validateObjecId, verifyToken, updateCommentCtrl)
+
+//  
+router.route("/like/:id").put(validateObjecId, verifyToken, toggleLikeCommentCtrl);
 
 module.exports = router;
