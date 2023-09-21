@@ -45,8 +45,8 @@ module.exports.createCommentCtrl = asyncHandler(async (req, res) => {
 module.exports.getAllCommentsCtrl = asyncHandler(async (req, res) => {
   // Get All Comments From DB
   let comments = await Comment.find()
-  .sort({ createdAt: -1 })
-  .populate("user", ["-password"]);
+    .sort({ createdAt: -1 })
+    .populate("user", ["-password"]);
 
   // Send Response To Client
   res.status(200).json(comments);
@@ -122,4 +122,48 @@ module.exports.updateCommentCtrl = asyncHandler(async (req, res) => {
   res
     .status(200)
     .json({ msg: "Comment Updated Successfully", comment: updatedComment });
+});
+
+/** -----------------------------------
+ * @desc   Toggle Like
+ * @route  /api/comments/like/:id
+ * @method PUT
+ * @access private (Only Loggen In)
+-----------------------------------*/
+
+module.exports.toggleLikeCommentCtrl = asyncHandler(async (req, res) => {
+  const loggedInUser = req.user.id;
+  const { id: commentId } = req.params;
+
+  // Get Post From DB
+  let comment = await Comment.findById(commentId);
+  if (!comment) {
+    return res.status(404).json({ msg: "Comment Not Found" });
+  }
+
+  // Toggle Like
+  const isCommetnAlreadyLiked = comment.likes.find(
+    (user) => user.toString() === loggedInUser
+  );
+
+  if (isCommetnAlreadyLiked) {
+    comment = await Comment.findByIdAndUpdate(
+      commentId,
+      {
+        $pull: { likes: loggedInUser },
+      },
+      { new: true }
+    );
+  } else {
+    comment = await Comment.findByIdAndUpdate(
+      commentId,
+      {
+        $push: { likes: loggedInUser },
+      },
+      { new: true }
+    );
+  }
+
+  // Send Response To Client
+  res.status(200).json(comment);
 });
