@@ -33,12 +33,12 @@ app.use(hpp());
 app.use(xss());
 
 // Rate Limiting
-app.use(
-  rateLimiting({
-    windowMs: 10 * 60 * 1000, // 10 Minutes
-    max: 450,
-  })
-);
+// app.use(
+//   rateLimiting({
+//     windowMs: 10 * 60 * 1000, // 10 Minutes
+//     max: 450,
+//   })
+// );
 
 
 // Cors Policy
