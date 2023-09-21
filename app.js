@@ -36,7 +36,7 @@ app.use(xss());
 app.use(
   rateLimiting({
     windowMs: 10 * 60 * 1000, // 10 Minutes
-    max: 200,
+    max: 450,
   })
 );
 
